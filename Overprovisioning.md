@@ -2,11 +2,11 @@
 
 # Over Provisioning Red Hat Openshift on AWS
 
-There might be occasions where over provisioning your cluster will provide great benefit to you and your customers.
-If you experience sudden burst of pods being created in a short amount of time, you can find your self in a situation where you have to wait for a new node to spin up. This can cause issues as you will have pods being stuck in a pending phase for around 10 minutes whilst you wait for the new node. 
+There might be occasions where over provisioning your cluster will provide great benefit .
+If you experience sudden bursts of pods being created in a short amount of time, you can find your self in a situation where you have to wait for a new node to spin up. This can cause issues as you will have pods being stuck in a pending phase for around 10 minutes whilst you wait for the new node. 
 
 What you might want to do is have over provision your cluster. 
-You can have a spare node at all times, or when the workflow starts to pick up.
+You can have a spare node at all times, or pre-emptily create a new node when the workflow starts to pick up.
 
 ## Use Cases
 
@@ -15,26 +15,24 @@ This leaves the low priority pods in a pending state. This forces Openshift to s
 
 #### Spare Node
 
-In this use case, the aim is to have spare nodes all the time. Typically, workloads are coming in faster than a node is spawned. An example might be developers spinning up workloads at 9AM when using Red Hat Dev Spaces. 
+In this use case, the aim is to have spare nodes all the time. Typically, Workloads are coming in faster than a node is spawned. An example might be developers spinning up workloads at 9AM when using Red Hat Dev Spaces. 
 
 ![Workflow Diagram](./images/Spare_Node.jpg)
 
 As you can see, we initially start out with only 2 worker nodes.
-with the spare pod solution, we can have a additional node at all times.
+With the spare pod solution, we can have a additional node at all times.
 
 When the real/high-priority workload starts, it forces the low-priority pods out of the nodes.
-The low priority pods is then stuck in pending, as it is unschedulable. 
+The low priority pods are then stuck in pending, as it is unschedulable. 
 This forces the auto scaler to spin up a new node. Giving you room to have even more workload in the additional nodes.
 
 #### Pick Up Workflow
 
 This workflow is designed to up the cluster when workloads starts to come in. The workloads might come in a slower, but you might prefer to have a node ready rather than waiting for a new node.   
 
-
 ![Workflow Diagram](./images/pickup.jpg)
 
-
-we have 2 nodes with the cluster to start, the nodes are then filled with low priority pods. 
+We have 2 nodes with the cluster to start, the nodes are then filled with low priority pods. 
 When the real/high-priority workload starts, it forces the low-priority pods out of the nodes.
 The low priority pods is then stuck in pending, as it is unschedulable. 
 This forces the auto scaler to spin up a new node. Giving you room to have even more workload in the additional nodes.
@@ -54,7 +52,7 @@ Login to `console.redhat.com` and go to your cluster.
 
 Go to the Machine Pool tab
 
-create a new machine pool or select a pre-existing machine pool and turn on the auto-scaler (if it not enabled). 
+Create a new machine pool or select a pre-existing machine pool and turn on the auto-scaler (if it not enabled). 
 
 If using multiple Machine Pools, I would recommend that you label it, so you can have the deployments fixed to a certain machine pool.
 
@@ -68,7 +66,7 @@ oc new project over-provision
 #### Create a Priority Class
 
 The Priority class dictates how important a pod compared to other pods. A lower priority would cause the scheduler will evict the pods, to allow the schedule of higher priority pods. By default most pods have a priority of 0.
-We are creating a new `PriorityClass` to allow our pods to be evicted, When more important workloads are created.
+We are creating a new `PriorityClass` to allow our pods to be evicted, when more important workloads are created.
 
 Create a new priority class on your OpenShift Cluster. 
 
@@ -130,7 +128,7 @@ The easiest method is to manually control the number of replicas. We can set it 
 This can be done using the deployment, or by increasing the number of replicas using the UI or CLI.
 `oc scale deployment overprovisioning -n over-provision --replicas=20`
 
-#### AutoScaler
+#### Auto Scaler
 
 The other option is to use the `cluster-proportional-autoscaler`.
 The auto scaler dynamically controls the number of replicas. This means that within a set parameter it will scale accordingly.
@@ -177,8 +175,8 @@ More information and configuration can be found here : https://github.com/kubern
 
 ## Conclusion
 
-there are benefits and negatives to this solution, an increase in costs as you will have more node vs nodes being ready to use at any given time. 
-it might not be for everyone, when i tested the solution the decreased wait time for Red Hat Dev Spaces was beneficial. It would allow our users to login and start working faster rather than being forced to wait 10 minutes for a new node to spin up and be ready. If you have peaky workflow, for example users login in at 9AM, this solution might work for you. It will require tailoring for your environment and use case but will hopefully be beneficial
+There are benefits and negatives to this solution, an increase in costs as you will have more node vs nodes being ready to use at any given time. 
+It might not be for everyone, when i tested the solution the decreased wait time for Red Hat Dev Spaces was beneficial. It would allow our users to login and start working faster rather than being forced to wait 10 minutes for a new node to spin up and be ready. If you have peaky workflow, for example users login in at 9AM, this solution might work for you. It will require tailoring for your environment and use case but will hopefully be beneficial
 
 
 
