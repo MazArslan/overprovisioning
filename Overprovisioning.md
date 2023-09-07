@@ -26,6 +26,9 @@ When the real/high-priority workload starts, it forces the low-priority pods out
 The low priority pods are then stuck in pending, as it is unschedulable. 
 This forces the auto scaler to spin up a new node. Giving you room to have even more workload in the additional nodes.
 
+Comparing not having this solution
+![Comparison](./images/Comparison.jpg)
+
 #### Pick Up Workflow
 
 This workflow is designed to up the cluster when workloads starts to come in. The workloads might come in a slower, but you might prefer to have a node ready rather than waiting for a new node.   
@@ -131,8 +134,47 @@ This can be done using the deployment, or by increasing the number of replicas u
 #### Auto Scaler
 
 The other option is to use the `cluster-proportional-autoscaler`.
-The auto scaler dynamically controls the number of replicas. This means that within a set parameter it will scale accordingly.
+The auto scaler dynamically controls the number of replicas, using a criteria set using a config map called `overprovisioning-autoscaler`, with the values set in the `default-params` section. This means that within a set parameter it will scale accordingly. The auto scaler works in proportion to your cluster, looking at number of CPU cores, Number of nodes and etc. 
 
+
+```
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: cluster-proportional-autoscaler-example
+  namespace: over-provision
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-proportional-autoscaler-example
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources: ["replicationcontrollers/scale"]
+    verbs: ["get", "update"]
+  - apiGroups: ["extensions","apps"]
+    resources: ["deployments/scale", "replicasets/scale"]
+    verbs: ["get", "update"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-proportional-autoscaler-example
+subjects:
+  - kind: ServiceAccount
+    name: cluster-proportional-autoscaler-example
+    namespace: overprovision
+roleRef:
+  kind: ClusterRole
+  name: cluster-proportional-autoscaler-example
+  apiGroup: rbac.authorization.k8s.io
+```
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -163,15 +205,44 @@ spec:
             - --logtostderr=true
             - --v=2
       serviceAccountName: cluster-proportional-autoscaler-example
-
 ```
-
 The autoscaler creates a config map called `overprovisioning-autoscaler` with the values set in the `default-params` section.
 There are multiple params that we can set including a minimum and maximum number of replicas. 
 
 `coresPerReplica` is an important value, leaving it as the default 1 would not allow the cluster autoscaler to scale down. I found it best to increase this value to above 1. I've had success with `1.2`, this would be great starting place. Combining it with a minimum value allow you to increase this value to have a spare node running if you need it. 
 
 More information and configuration can be found here : https://github.com/kubernetes-sigs/cluster-proportional-autoscaler#control-patterns-and-configmap-formats
+
+## Testing
+
+To test the scaling simply create a deployment and increase the number of replicas using the UI or running `oc scale --replicas=7 deployment high-priority-pod`
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: high-priority-pod
+  name: high-priority-pod
+  namespace: over-provision
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: high-priority-pod
+  template:
+    metadata:
+      labels:
+        app: high-priority-pod
+    spec:
+      containers:
+        - image: image-registry.openshift-image-registry.svc:5000/openshift/httpd
+          name: httpd
+          ### Not needed, purely for demo purposes
+          resources:
+            requests:
+              cpu: "350m"
+```
 
 ## Conclusion
 
