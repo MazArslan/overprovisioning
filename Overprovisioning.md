@@ -215,7 +215,7 @@ More information and configuration can be found here : https://github.com/kubern
 
 ## Testing
 
-To test the scaling simply create a deployment and increase the number of replicas using the UI or running `oc scale --replicas=7 deployment high-priority-pod`
+To test the scaling simply create a deployment and increase the number of replicas using the UI or running `oc scale --replicas=15 deployment high-priority-pod`
 
 ```
 apiVersion: apps/v1
