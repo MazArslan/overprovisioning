@@ -32,7 +32,7 @@ Comparing not having this solution
 
 #### Pick Up Workflow
 
-This workflow is designed to up the cluster when workloads starts to come in. The workloads might come in a slower, but you might prefer to have a node ready rather than waiting for a new node.   
+This workflow is designed to up the cluster when workloads starts to come in. The workloads might come in a slower, but prefer to have a spare node ready rather than waiting for a new node. 
 
 ![Workflow Diagram](./images/pickup.jpg)
 
@@ -119,8 +119,8 @@ spec:
 Apply deployment using `oc apply -f <low-priority-pods.yaml>`
 
 There are two items that should be changed for your use case, the number of `replicas` and the `CPU` requests.
-The CPU requests value should be set to an average of your workload cpu requests, this will allow you to estimate and set a predetermined sudden load. 
-For example if your sudden load peak is 10 pods, all consuming ~`350m` CPU, you can use the number of replicas and the CPU to set this value. this will allow your cluster to have room for the sudden load peak.
+The CPU requests value should be set to an average of your workload CPU requests, this can help provide a estimate for predetermined sudden load. 
+For example if your sudden load peak is 10 pods, all consuming ~`350m` CPU, setting the number of replicas and CPU will allow your cluster to have room for the sudden load peak.
 
 ### Controlling the number of replicas
 
@@ -210,7 +210,7 @@ spec:
 The autoscaler creates a config map called `overprovisioning-autoscaler` with the values set in the `default-params` section.
 There are multiple params that can be set including a minimum and maximum number of replicas. 
 
-`coresPerReplica` is an important value, leaving it as the default 1 would not allow the cluster autoscaler to scale down. It's best to increase this value to above 1. `1.2` would be great starting place. Combining it with a minimum value allow you to increase this value to have a spare node running if required. 
+`coresPerReplica` is an important value, leaving it as the default 1 would not allow the cluster autoscaler to scale down. It's best to increase this value to above 1. `1.2` would be great starting place. Combining it with a minimum value allows a spare node to be running at all times, if required. 
 
 More information and configuration can be found here : https://github.com/kubernetes-sigs/cluster-proportional-autoscaler#control-patterns-and-configmap-formats
 
