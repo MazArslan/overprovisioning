@@ -19,7 +19,7 @@ In this use case, the aim is to have spare nodes all the time. Typically, Worklo
 
 ![Workflow Diagram](./images/Spare_Node.jpg)
 
-At the start there is only 2 worker nodes.
+At the start there are only 2 worker nodes.
 With the spare pod solution, there can be a additional node at all times. 
 This is done by controlling the number of low-priority pod replicas (see Controlling the number of replicas, below).
 
@@ -33,6 +33,7 @@ Comparing not having this solution
 #### Pick Up Workflow
 
 This workflow is designed to up the cluster when workloads starts to come in. The workloads might come in a slower, but prefer to have a spare node ready rather than waiting for a new node. 
+For example let's say you run a batch job which processes foreign payments in parallel, every hour, different currency, every hour. And the duration of that batch job is more than an hour. So initially, each of those low priority pods are evicted and replaced by a first batch. In hour time, another batch gets spawned - but you already have a spare node created in the meantime, so it can get scheduled successfully, without waiting for a new node to spawn.
 
 ![Workflow Diagram](./images/pickup.jpg)
 
@@ -57,8 +58,9 @@ Login to `console.redhat.com` and navigate to the cluster.
 
 ![select machine pool tab](./images/machine-pool-tab.png)
 Go to the Machine Pool tab
+
 ![edit machine pool](./images/scale-machine-pool.png)
-Create a new machine pool or select a pre-existing machine pool and select scale. 
+Create a new machine pool or Select a pre-existing machine pool and select `Scale`. 
 
 ![Enable Autoscaling](./images/enable-autoscaling.png)
 Enable Autoscaling on your machine pool
