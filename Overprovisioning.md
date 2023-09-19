@@ -52,16 +52,20 @@ Access to the OpenShift web console and access to your cluster on `console.redha
 
 #### Cluster Setup
 
+![navigate to your cluster](./images/navigate-cluster.png)
 Login to `console.redhat.com` and navigate to the cluster.
 
+![select machine pool tab](./images/machine-pool-tab.png)
 Go to the Machine Pool tab
+![edit machine pool](./images/scale-machine-pool.png)
+Create a new machine pool or select a pre-existing machine pool and select scale. 
 
-Create a new machine pool or select a pre-existing machine pool and turn on the auto-scaler (if it not enabled). 
+![Enable Autoscaling](./images/enable-autoscaling.png)
+Enable Autoscaling on your machine pool
 
 If using multiple Machine Pools, consider labeling it, so that the deployments can be fixed to a certain machine pool.
 
 #### Create Project
-
 Creating a new namespace on OpenShift.
 ```
 oc new project over-provision
